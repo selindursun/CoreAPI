@@ -1,4 +1,5 @@
 ﻿using CoreApi_BLL.Implementations;
+using CoreApi_BLL.Interfaces;
 using CoreApi_EL.Entities;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
@@ -19,8 +20,8 @@ namespace CoreApi_PL.Controllers
     [ApiController]
     public class AssignmentController : ControllerBase
     {
-        private readonly UnitOfWork _unitOfWork;
-        public AssignmentController(UnitOfWork unitOfWork)
+        private readonly IUnitOfWork _unitOfWork;
+        public AssignmentController(IUnitOfWork unitOfWork)
         {
             _unitOfWork = unitOfWork;
         }
@@ -62,6 +63,7 @@ namespace CoreApi_PL.Controllers
         {
             try
             {
+                model.CreatedDate = DateTime.Now;
                 bool result=_unitOfWork.AssignmentRepository.Add(model);
                 if (result)
                 {
@@ -76,11 +78,11 @@ namespace CoreApi_PL.Controllers
             }
         }
         //api/Products/DeleteProduct?id 
-        // public IActionResult DeleteProduct([FromQuery] int id)
+        // public IActionResult DeleteProduct([FromQuery] int id) *FromQuery ? işareti ile göndermek
 
-        //api/Products/DeleteProduct/1
+        //api/Assignment/1
         //[HttpDelete("{id}")]
-        //public IActionResult DeleteProduct(int id)
+        //api/Assignment/DeleteAssignment/1
         [HttpGet("[action]/{id}")]
         public IActionResult DeleteAssignment(int id)
         {
@@ -119,7 +121,7 @@ namespace CoreApi_PL.Controllers
                     var currentAssignment = _unitOfWork.AssignmentRepository.GetFirstOrDefault(x => x.Id == id);
                     if (currentAssignment != null)
                     {
-                        currentAssignment.Description = model.Description;
+                        currentAssignment.Description = string.IsNullOrEmpty(model.Description) ||model.Description=="XX" ? currentAssignment.Description : model.Description;
                         currentAssignment.IsCompleted = model.IsCompleted;
                         bool result = _unitOfWork.AssignmentRepository.Update(currentAssignment);
                         if (result)
